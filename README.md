@@ -1,67 +1,65 @@
-# Movie Recommendation System
+# Movie Recommendation App
 
-This project is a simple recommendation system designed to suggest movies based on user preferences. Using content-based filtering, the system recommends movies similar to those the user has enjoyed before. The project is built with Python and includes a web interface powered by Streamlit for ease of use.
+A simple movie recommendation app built with Streamlit, using the TMDb API to fetch movie posters. This application suggests similar movies based on user input and provides links to Google searches for each recommended movie.
 
-## Project Structure
-
-recommendation_system_project/ │ ├── myenv/ # Virtual environment files │ ├── data/ │ └── movies.csv # Dataset containing movie information (e.g., MovieLens dataset) │ ├── src/ # Main project code │ ├── data_preprocessing.py # Code for data loading and preprocessing │ ├── recommendation_engine.py # Core recommendation engine logic │ ├── app.py # Streamlit-based web app for user interface │ └── config.py # Project configuration settings │ ├── models/ # Trained model or parameter files │ └── model.pkl # Serialized model file │ ├── notebooks/ # Jupyter notebooks for data exploration │ └── data_exploration.ipynb # Initial data analysis notebook │ ├── requirements.txt # List of project dependencies ├── README.md # Project description and setup instructions └── .gitignore # Excludes unnecessary files from version control
-
+## Features
+- Movie recommendations based on user input
+- Movie posters fetched from TMDb API
+- Links to Google search for each recommended movie
+- Modern dark-themed UI
 
 ## Getting Started
 
-### Prerequisites
 
-Ensure you have Python 3 installed. Install any required packages using the `requirements.txt` file provided.
+## Prerequisites
 
-### Setting Up the Virtual Environment
+- Python 3.x
+- A TMDb API Key (sign up at https://www.themoviedb.org/ to get one)
 
-1. **Create the virtual environment** (in the root directory):
+## Setup Instructions
+
+1. **Clone the repository:**
 
    ```bash
+   git clone https://github.com/ramazanusen/movie-recommendation-app.git
+   cd movie-recommendation-app
+
+2. **Create a virtual environment:**
+   
    python3 -m venv myenv
+   source myenv/bin/activate  # On macOS/Linux
+   myenv\Scripts\activate     # On Windows
 
-2. **Activate the virtual environment**:
-    On macOS/Linux:
-        source myenv/bin/activate
-    On Windows:
-        myenv\Scripts\activate
+4. **Install the required packages:**
+   
+   pip install -r requirements.txt   
 
-3. **Install dependencies**:
-    pip install -r requirements.txt
+5. **Set up environment variables:**
+   
+   Create a .env file in the project root and add your TMDb API key:
+   TMDB_API_KEY=YOUR_API_KEY_HERE
 
-### Running the Project
+6. **Run the application:**
+   streamlit run src/app.py
 
-1. **Prepare the Data: Ensure the movies.csv file is located in the data/ directory.**
+   This will launch the Streamlit application, and you should see a local URL in the terminal. Open it in your browser to interact with the app.
 
-2. **Run the Web Application**:
-    streamlit run src/app.py
+Usage
+1. Enter a movie title in the input field.
+2. Click the "Recommend" button to get a list of similar movie recommendations.
+3. Each recommendation includes:
+      -Movie poster (if available from TMDb)
+      -Link to Google search results for more information
+4. The entire card, including the poster and title, is clickable and redirects to the movie's Google search.
 
-3. **Using the Application: Enter a movie title in the app’s input box to receive a list of similar movies as recommendations.**
 
-### Project Details
+Configuration
+To update the .env file:
 
-Data Preprocessing (src/data_preprocessing.py)
-This module loads the dataset, removes unnecessary columns, handles missing values, and performs any other preprocessing required for the recommendation engine.
-
-Recommendation Engine (src/recommendation_engine.py)
-The core of the recommendation logic. Uses a content-based filtering approach to create similarity matrices and recommend movies based on user preferences.
-
-Web Interface (src/app.py)
-A simple Streamlit web application that provides an interactive UI for users to enter movie titles and view recommendations.
-
-Configuration (src/config.py)
-Contains any project-specific configurations, such as data paths and settings.
-
-Future Improvements
-    Potential enhancements include:
-
-    Collaborative Filtering: Adding a collaborative filtering option for improved recommendations.
-
-    Advanced Model Tuning: Experimenting with more advanced algorithms and optimizations.
-
-    User Profiles: Allowing users to save preferences for a personalized experience.
-
+Replace YOUR_API_KEY_HERE with your actual TMDb API key.
 License
-    This project is open-source and available for personal and educational use.
+This project is licensed under the MIT License. See the LICENSE file for details.
 
-# movie-recommendation-app
+Acknowledgements
+Streamlit - for the web application framework
+TMDb API - for movie data and posters
