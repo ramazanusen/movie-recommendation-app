@@ -1,54 +1,52 @@
-# src/data_preprocessing.py
 import pandas as pd
 
-def load_data(filepath):
-    """
-    Load the dataset from the provided file path.
-    """
+def load_and_process_imdb_data(akas_path, ratings_path, basics_path):
     try:
-        data = pd.read_csv(filepath, sep='\t', names=['user_id', 'item_id', 'rating', 'timestamp'])
-        print("Data loaded successfully.")
-        return data
-    except FileNotFoundError:
-        print(f"File not found. Please check the file path: {filepath}")
-        return None
+        # Load datasets
+        akas = pd.read_csv(akas_path, sep='\t', usecols=['titleId', 'title', 'region', 'isOriginalTitle'])
+        ratings = pd.read_csv(ratings_path, sep='\t', usecols=['tconst', 'averageRating', 'numVotes'])
+        basics = pd.read_csv(basics_path, sep='\t', usecols=['tconst', 'primaryTitle', 'startYear', 'genres'])
 
-def preprocess_data(data, movies_filepath):
-    """
-    Preprocess the data by handling missing values and unnecessary columns,
-    and join with movie titles, genres, and IMDb URLs.
-    """
-    # Drop unnecessary columns
-    data.drop(columns=['timestamp'], inplace=True)
+        # Debugging: Print data shapes
+        print("Basics Data Shape:", basics.shape)
+        print("Ratings Data Shape:", ratings.shape)
+        print("Akas Data Shape:", akas.shape)
 
-    # Load movies data with correct column names for u.item
-    movies = pd.read_csv(movies_filepath, sep='|', names=['item_id', 'title', 'release_date', 'video_release_date', 
-                                                          'IMDb_URL', 'unknown', 'Action', 'Adventure', 'Animation', 
-                                                          'Children', 'Comedy', 'Crime', 'Documentary', 'Drama', 
-                                                          'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery', 
-                                                          'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western'], 
-                         usecols=['item_id', 'title', 'release_date', 'IMDb_URL', 'Action', 'Adventure', 
-                                  'Animation', 'Children', 'Comedy', 'Crime', 'Documentary', 'Drama', 
-                                  'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance', 
-                                  'Sci-Fi', 'Thriller', 'War', 'Western'], encoding='latin-1')
+        # Merge datasets: Basics and Ratings
+        merged = pd.merge(basics, ratings, on='tconst', how='inner')
 
-    # Extract year from release_date
-    movies['year'] = movies['release_date'].str.extract(r'(\d{4})').astype(float)
-    
-    # Combine genres into a single 'genres' column
-    genre_columns = ['Action', 'Adventure', 'Animation', 'Children', 'Comedy', 'Crime', 'Documentary', 'Drama', 
-                     'Fantasy', 'Film-Noir', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 
-                     'War', 'Western']
-    movies['genres'] = movies[genre_columns].apply(lambda row: ' '.join([genre for genre, present in zip(genre_columns, row) if present == 1]), axis=1)
+        # Filter by movie type and valid startYear
+        merged = merged[(merged['startYear'].notnull()) & (merged['startYear'] != '\\N')]
+        merged['startYear'] = merged['startYear'].astype(int)
 
-    # Drop individual genre columns after combining
-    movies.drop(columns=genre_columns, inplace=True)
+        # Filter movies with at least 1000 votes
+        merged = merged[(merged['numVotes'] >= 1000)]
 
-    # Merge datasets on item_id
-    data = pd.merge(data, movies, on='item_id')
+        # Rename and simplify columns
+        merged = merged.rename(columns={
+            'primaryTitle': 'title',
+            'averageRating': 'rating',
+            'startYear': 'year'
+        })
 
-    # Check the processed data
-    print("Processed data with genres, IMDb URL, and year columns:")
-    print(data.head())
+        # Merge with Akas dataset
+        merged = pd.merge(merged, akas, left_on='tconst', right_on='titleId', how='left')
 
-    return data
+        # Use only original titles or titles from 'US' region
+        merged = merged[(merged['isOriginalTitle'] == 1) | (merged['region'] == 'US')]
+
+        # Drop duplicates and unnecessary columns
+        merged = merged[['title', 'year', 'genres', 'rating', 'numVotes']].drop_duplicates()
+
+        # Fill missing genres with 'Unknown'
+        merged['genres'] = merged['genres'].fillna('Unknown')
+
+        return merged
+
+    except KeyError as e:
+        print(f"KeyError: {e}")
+        print("Available columns in the problematic dataset:")
+        raise
+    except Exception as e:
+        print(f"An unexpected error occurred: {str(e)}")
+        raise
