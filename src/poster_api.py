@@ -1,10 +1,17 @@
 import requests
 import streamlit as st
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 class MoviePosterAPI:
     def __init__(self, api_token=None):
-        # TMDB doesn't need the token you provided, we'll use their API key
-        self.api_key = "1b5adf76a72a13bad99b8fc0c68cb085"  # Free TMDB API key
+        # Get API key from environment variable
+        self.api_key = os.getenv('TMDB_API_KEY')
+        if not self.api_key:
+            raise ValueError("TMDB_API_KEY not found in environment variables")
         self.base_url = "https://api.themoviedb.org/3"
         
     def search_movie(self, title, year=None):
