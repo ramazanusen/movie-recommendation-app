@@ -1,65 +1,108 @@
-# Movie Recommendation App
+# Movie Recommendation System
 
-A simple movie recommendation app built with Streamlit, using the TMDb API to fetch movie posters. This application suggests similar movies based on user input and provides links to Google searches for each recommended movie.
+A sophisticated movie recommendation system built with Python and Streamlit, leveraging content-based filtering to suggest similar movies based on genres, ratings, and release years. The application provides an intuitive user interface for discovering movies similar to your favorites.
 
 ## Features
-- Movie recommendations based on user input
-- Movie posters fetched from TMDb API
-- Links to Google search for each recommended movie
-- Modern dark-themed UI
 
-## Getting Started
+- Content-based movie recommendations using:
+  - Genre matching
+  - Rating similarity
+  - Release year proximity
+- Fuzzy string matching for flexible movie title search
+- User-friendly Streamlit interface
+- Detailed movie information display including:
+  - Movie title and release year
+  - Genre information
+  - IMDb rating
+  - Number of votes
+  - Similarity score with the searched movie
 
+## Project Structure
+
+```
+movie-recommendation-app/
+├── data/                    # Data directory for movie datasets
+├── models/                  # Directory for trained models
+├── src/
+│   ├── app.py              # Streamlit application
+│   ├── config.py           # Configuration settings
+│   ├── data_loader.py      # Data loading utilities
+│   ├── data_preprocessing.py # Data preprocessing functions
+│   ├── recommendation_engine.py # Core recommendation logic
+│   └── recommender.py      # Recommendation system class
+├── requirements.txt        # Project dependencies
+└── README.md              # Project documentation
+```
 
 ## Prerequisites
 
 - Python 3.x
-- A TMDb API Key (sign up at https://www.themoviedb.org/ to get one)
+- pip (Python package installer)
 
-## Setup Instructions
+## Installation
 
 1. **Clone the repository:**
-
    ```bash
    git clone https://github.com/ramazanusen/movie-recommendation-app.git
    cd movie-recommendation-app
+   ```
 
 2. **Create a virtual environment:**
-   
-   python3 -m venv myenv
+   ```bash
+   python -m venv myenv
    source myenv/bin/activate  # On macOS/Linux
    myenv\Scripts\activate     # On Windows
+   ```
 
-4. **Install the required packages:**
-   
-   pip install -r requirements.txt   
+3. **Install required packages:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-5. **Set up environment variables:**
-   
-   Create a .env file in the project root and add your TMDb API key:
-   TMDB_API_KEY=YOUR_API_KEY_HERE
+## Usage
 
-6. **Run the application:**
+1. **Start the application:**
+   ```bash
    streamlit run src/app.py
+   ```
 
-   This will launch the Streamlit application, and you should see a local URL in the terminal. Open it in your browser to interact with the app.
+2. **Using the interface:**
+   - Enter a movie title in the search box
+   - Select the number of recommendations you want (5-20)
+   - Click "Show Recommendations" to get similar movies
+   - View detailed information about each recommended movie
 
-Usage
-1. Enter a movie title in the input field.
-2. Click the "Recommend" button to get a list of similar movie recommendations.
-3. Each recommendation includes:
-      -Movie poster (if available from TMDb)
-      -Link to Google search results for more information
-4. The entire card, including the poster and title, is clickable and redirects to the movie's Google search.
+## How It Works
 
+The recommendation system uses content-based filtering with the following components:
 
-Configuration
-To update the .env file:
+1. **Data Preprocessing:**
+   - Combines movie metadata including genres, ratings, and release years
+   - Handles missing values and data normalization
 
-Replace YOUR_API_KEY_HERE with your actual TMDb API key.
-License
-This project is licensed under the MIT License. See the LICENSE file for details.
+2. **Recommendation Engine:**
+   - Creates a content-based representation of movies
+   - Uses cosine similarity to find similar movies
+   - Implements fuzzy string matching for flexible title search
 
-Acknowledgements
-Streamlit - for the web application framework
-TMDb API - for movie data and posters
+3. **User Interface:**
+   - Streamlit-based web interface
+   - Interactive elements for user input
+   - Clear presentation of recommendations
+
+## Dependencies
+
+- pandas >= 1.3.0
+- scikit-learn >= 0.24.0
+- streamlit >= 1.0.0
+- fuzzywuzzy >= 0.18.0
+- python-Levenshtein >= 0.12.0
+- numpy >= 1.19.0
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
