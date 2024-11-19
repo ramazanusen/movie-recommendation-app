@@ -1,6 +1,7 @@
 import streamlit as st
 from data_loader import load_movies
 from recommender import MovieRecommender
+import urllib.parse
 
 def format_number(num):
     """
@@ -11,6 +12,13 @@ def format_number(num):
     elif num >= 1_000:
         return f"{num/1_000:.1f}K"
     return str(num)
+
+def create_google_search_url(movie_title, year):
+    """
+    Create a Google search URL for a movie
+    """
+    query = f"{movie_title} {year} movie"
+    return f"https://www.google.com/search?q={urllib.parse.quote(query)}"
 
 @st.cache_resource
 def initialize_recommender():
@@ -67,7 +75,9 @@ def main():
                                 col1, col2 = st.columns([2, 1])
                                 
                                 with col1:
-                                    st.write(f"**{movie['title']}** ({movie['year']})")
+                                    # Create clickable movie title with Google search link
+                                    search_url = create_google_search_url(movie['title'], movie['year'])
+                                    st.markdown(f"**[{movie['title']}]({search_url})** ({movie['year']})")
                                     st.write(f"Genres: {movie['genres']}")
                                 
                                 with col2:
