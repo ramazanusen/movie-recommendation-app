@@ -2,6 +2,14 @@
 
 A sophisticated movie recommendation system built with Python and Streamlit, leveraging content-based filtering to suggest similar movies based on genres, ratings, and release years. The application provides an intuitive user interface for discovering movies similar to your favorites.
 
+<img width="590" alt="Ekran Resmi 2024-11-20 02 00 03" src="https://github.com/user-attachments/assets/33d3e39b-29c5-4762-8a1e-7f16e65f32d8">
+
+<img width="665" alt="Ekran Resmi 2024-11-20 01 58 45" src="https://github.com/user-attachments/assets/140fe4cf-d31f-4c36-9375-a0813da12026">
+
+
+https://github.com/user-attachments/assets/4dca6294-f2e2-4471-b240-95338e6205b4
+
+
 ## Features
 
 - Content-based movie recommendations using:
