@@ -41,3 +41,12 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Local development settings
+*.log
+*.sqlite3
