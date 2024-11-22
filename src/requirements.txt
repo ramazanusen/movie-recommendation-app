@@ -1,0 +1,8 @@
+streamlit
+pandas
+scikit-learn
+fuzzywuzzy
+python-Levenshtein
+numpy
+requests
+python-dotenv
