@@ -129,20 +129,28 @@ def _create_content_string(row):
     try:
         content_parts = []
         
-        # Add genres (highest weight)
+        # Add genres (balanced weight)
         if pd.notna(row['genres']):
             genres = str(row['genres']).split()
-            content_parts.extend([genre.lower() for genre in genres] * 3)
+            content_parts.extend([genre.lower() for genre in genres] * 2)  # Reduced weight for genres
         
-        # Add year (medium weight)
+        # Add year (increased weight for temporal relevance)
         if pd.notna(row['year']):
             year = str(int(row['year']))
-            content_parts.extend([f"year_{year}"] * 2)
+            content_parts.extend([f"year_{year}"] * 3)  # Increased weight for year
         
-        # Add rating (lower weight)
+        # Add rating (increased weight)
         if pd.notna(row['averageRating']):
             rating = int(float(row['averageRating']) * 2)
-            content_parts.append(f"rating_{rating}")
+            content_parts.extend([f"rating_{rating}"] * 2)  # Increased weight for rating
+            
+        # Add vote count for popularity consideration
+        if pd.notna(row.get('numVotes')):
+            vote_count = int(row['numVotes'])
+            if vote_count > 10000:
+                content_parts.append('popular_movie')
+            elif vote_count > 5000:
+                content_parts.append('moderate_popularity')
         
         # Join all parts with spaces
         content = ' '.join(content_parts)
@@ -157,7 +165,7 @@ def _create_content_string(row):
         return ""
 
 def get_recommendations(title, data, similarity_matrix, min_similarity=70, max_recommendations=10):
-    """Get movie recommendations based on title"""
+    """Get movie recommendations based on title with genre diversity"""
     try:
         if not isinstance(title, str) or not title.strip():
             raise ValueError("Invalid title: must be a non-empty string")
@@ -175,12 +183,19 @@ def get_recommendations(title, data, similarity_matrix, min_similarity=70, max_r
 
         # Get similarity scores
         similarity_scores = list(enumerate(similarity_matrix[movie_idx]))
-        sorted_scores = sorted(similarity_scores, key=lambda x: x[1], reverse=True)
-
+        
+        # Get source movie genres
+        source_genres = set(data.iloc[movie_idx]['genres'].split() if pd.notna(data.iloc[movie_idx]['genres']) else [])
+        
+        # Calculate diversity scores and combine with similarity
         recommendations = []
-        seen_titles = set()  # To avoid duplicate recommendations
-
-        for idx, score in sorted_scores:
+        seen_genres = set()  # Track recommended genres
+        seen_titles = set()  # Track recommended titles
+        
+        # Sort by similarity first
+        sorted_scores = sorted(similarity_scores, key=lambda x: x[1], reverse=True)
+        
+        for idx, base_score in sorted_scores:
             if len(recommendations) >= max_recommendations:
                 break
                 
@@ -193,17 +208,38 @@ def get_recommendations(title, data, similarity_matrix, min_similarity=70, max_r
             # Skip if we've already recommended this title
             if title in seen_titles:
                 continue
-                
+            
+            # Get current movie's genres
+            current_genres = set(movie['genres'].split() if pd.notna(movie['genres']) else [])
+            
+            # Calculate genre diversity bonus
+            new_genres = current_genres - seen_genres
+            diversity_bonus = len(new_genres) * 0.1  # Bonus for new genres
+            
+            # Calculate rating bonus (0-0.2)
+            rating_bonus = float(movie['averageRating'])/50 if pd.notna(movie['averageRating']) else 0
+            
+            # Calculate recency bonus (0-0.1)
+            current_year = 2024
+            year = int(movie['year']) if pd.notna(movie['year']) else current_year
+            recency_bonus = max(0, min(0.1, (year - (current_year - 40)) / 400))
+            
+            # Final score combines similarity with diversity and other bonuses
+            final_score = float(base_score) + diversity_bonus + rating_bonus + recency_bonus
+            
             seen_titles.add(title)
+            seen_genres.update(current_genres)
             
             recommendations.append({
                 'title': title,
                 'year': int(movie['year']) if pd.notna(movie['year']) else None,
-                'genres': movie['genres'].split() if pd.notna(movie['genres']) else [],
+                'genres': list(current_genres),
                 'rating': float(movie['averageRating']) if pd.notna(movie['averageRating']) else None,
-                'similarity_score': float(score)
+                'similarity_score': final_score
             })
 
+        # Sort final recommendations by adjusted score
+        recommendations.sort(key=lambda x: x['similarity_score'], reverse=True)
         return recommendations
             
     except Exception as e:
